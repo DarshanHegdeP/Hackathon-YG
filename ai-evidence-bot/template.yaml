@@ -1,0 +1,477 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AI-Powered Evidence Collection Bot - Review & Control Management
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: nodejs18.x
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        REVIEWS_TABLE: !Ref ReviewsTable
+        CONTROLS_TABLE: !Ref ControlsTable
+        REVIEW_CONTROLS_TABLE: !Ref ReviewControlsTable
+        USERS_TABLE: !Ref UsersTable
+        AUDIT_EVENTS_TABLE: !Ref AuditEventsTable
+
+Resources:
+  ReviewsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: reviewId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: reviewId
+          KeyType: HASH
+
+  ControlsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: controlId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: controlId
+          KeyType: HASH
+
+  ReviewControlsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: reviewControlId
+          AttributeType: S
+        - AttributeName: reviewId
+          AttributeType: S
+        - AttributeName: controlId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: reviewControlId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: reviewId-index
+          KeySchema:
+            - AttributeName: reviewId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: controlId-index
+          KeySchema:
+            - AttributeName: controlId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+
+  AuditEventsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: auditId
+          AttributeType: S
+        - AttributeName: entityId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: auditId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: entityId-index
+          KeySchema:
+            - AttributeName: entityId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  ReviewApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: reviews/handler.create
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditEventsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ControlsTable
+      Events:
+        CreateReview:
+          Type: Api
+          Properties:
+            Path: /reviews
+            Method: post
+        GetReview:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}
+            Method: get
+        ListReviews:
+          Type: Api
+          Properties:
+            Path: /reviews
+            Method: get
+        UpdateReview:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}
+            Method: patch
+        ActivateReview:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}/activate
+            Method: post
+        CompleteReview:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}/complete
+            Method: post
+
+  ReviewGetApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: reviews/handler.get
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewsTable
+      Events:
+        GetReview:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}
+            Method: get
+
+  ReviewListApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: reviews/handler.list
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewsTable
+      Events:
+        ListReviews:
+          Type: Api
+          Properties:
+            Path: /reviews
+            Method: get
+
+  ReviewUpdateApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: reviews/handler.update
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditEventsTable
+      Events:
+        UpdateReview:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}
+            Method: patch
+
+  ReviewActivateApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: reviews/handler.activate
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditEventsTable
+      Events:
+        ActivateReview:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}/activate
+            Method: post
+
+  ReviewCompleteApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: reviews/handler.complete
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditEventsTable
+      Events:
+        CompleteReview:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}/complete
+            Method: post
+
+  ControlApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: controls/handler.create
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditEventsTable
+      Events:
+        CreateControl:
+          Type: Api
+          Properties:
+            Path: /controls
+            Method: post
+        GetControl:
+          Type: Api
+          Properties:
+            Path: /controls/{controlId}
+            Method: get
+        ListControls:
+          Type: Api
+          Properties:
+            Path: /controls
+            Method: get
+        UpdateControl:
+          Type: Api
+          Properties:
+            Path: /controls/{controlId}
+            Method: patch
+
+  ControlGetApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: controls/handler.get
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ControlsTable
+      Events:
+        GetControl:
+          Type: Api
+          Properties:
+            Path: /controls/{controlId}
+            Method: get
+
+  ControlListApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: controls/handler.list
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ControlsTable
+      Events:
+        ListControls:
+          Type: Api
+          Properties:
+            Path: /controls
+            Method: get
+
+  ControlUpdateApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: controls/handler.update
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditEventsTable
+      Events:
+        UpdateControl:
+          Type: Api
+          Properties:
+            Path: /controls/{controlId}
+            Method: patch
+
+  ReviewControlApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: review-controls/handler.attachControl
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditEventsTable
+      Events:
+        AttachControl:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}/controls
+            Method: post
+        ListControlsForReview:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}/controls
+            Method: get
+        GetReviewControl:
+          Type: Api
+          Properties:
+            Path: /review-controls/{reviewControlId}
+            Method: get
+        UpdateReviewControl:
+          Type: Api
+          Properties:
+            Path: /review-controls/{reviewControlId}
+            Method: patch
+
+  ReviewControlListApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: review-controls/handler.listControlsForReview
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+      Events:
+        ListControlsForReview:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}/controls
+            Method: get
+
+  ReviewControlGetApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: review-controls/handler.getDetails
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+      Events:
+        GetReviewControl:
+          Type: Api
+          Properties:
+            Path: /review-controls/{reviewControlId}
+            Method: get
+
+  ReviewControlUpdateApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: review-controls/handler.update
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReviewControlsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditEventsTable
+      Events:
+        UpdateReviewControl:
+          Type: Api
+          Properties:
+            Path: /review-controls/{reviewControlId}
+            Method: patch
+
+  UserApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: users/handler.list
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+      Events:
+        ListUsers:
+          Type: Api
+          Properties:
+            Path: /users
+            Method: get
+        GetUser:
+          Type: Api
+          Properties:
+            Path: /users/{userId}
+            Method: get
+
+  UserGetApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: users/handler.get
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+      Events:
+        GetUser:
+          Type: Api
+          Properties:
+            Path: /users/{userId}
+            Method: get
+
+  AuditApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: audit/handler.getReviewAudit
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditEventsTable
+      Events:
+        GetReviewAudit:
+          Type: Api
+          Properties:
+            Path: /reviews/{reviewId}/audit
+            Method: get
+        GetReviewControlAudit:
+          Type: Api
+          Properties:
+            Path: /review-controls/{reviewControlId}/audit
+            Method: get
+
+  AuditGetRcApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: audit/handler.getReviewControlAudit
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditEventsTable
+      Events:
+        GetReviewControlAudit:
+          Type: Api
+          Properties:
+            Path: /review-controls/{reviewControlId}/audit
+            Method: get

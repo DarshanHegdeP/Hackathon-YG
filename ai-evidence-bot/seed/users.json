@@ -1,0 +1,42 @@
+[
+  {
+    "userId": "USER-LOD2-001",
+    "name": "LOD2 Reviewer",
+    "email": "reviewer1@bank.local",
+    "role": "LOD2_REVIEWER",
+    "businessUnit": "COMPLIANCE",
+    "active": true
+  },
+  {
+    "userId": "USER-LOD2-002",
+    "name": "LOD2 Manager",
+    "email": "manager1@bank.local",
+    "role": "LOD2_MANAGER",
+    "businessUnit": "COMPLIANCE",
+    "active": true
+  },
+  {
+    "userId": "USER-AML-001",
+    "name": "AML Operations",
+    "email": "amlops@bank.local",
+    "role": "BUSINESS_OWNER",
+    "businessUnit": "AML",
+    "active": true
+  },
+  {
+    "userId": "USER-AML-002",
+    "name": "KYC Operations",
+    "email": "kycops@bank.local",
+    "role": "BUSINESS_OWNER",
+    "businessUnit": "KYC",
+    "active": true
+  },
+  {
+    "userId": "USER-IT-001",
+    "name": "IT Security",
+    "email": "itsec@bank.local",
+    "role": "BUSINESS_OWNER",
+    "businessUnit": "IT",
+    "active": true
+  }
+]

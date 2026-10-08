@@ -1,0 +1,102 @@
+[
+  {
+    "controlId": "AML-001",
+    "name": "Transaction Monitoring Review",
+    "description": "Review of daily transaction alerts.",
+    "domain": "AML",
+    "riskLevel": "HIGH",
+    "frequency": "DAILY",
+    "requiredEvidenceTypes": ["ALERT_REPORT", "INVESTIGATION_LOG"],
+    "status": "ACTIVE"
+  },
+  {
+    "controlId": "AML-002",
+    "name": "High Risk Customer Review",
+    "description": "High-risk customers must undergo enhanced due diligence annually.",
+    "domain": "AML",
+    "riskLevel": "HIGH",
+    "frequency": "ANNUAL",
+    "requiredEvidenceTypes": ["CUSTOMER_POPULATION", "REVIEW_REPORT"],
+    "status": "ACTIVE"
+  },
+  {
+    "controlId": "AML-003",
+    "name": "Sanctions Alert Investigation",
+    "description": "Review sanctions alerts.",
+    "domain": "AML",
+    "riskLevel": "CRITICAL",
+    "frequency": "DAILY",
+    "requiredEvidenceTypes": ["SANCTIONS_LOG"],
+    "status": "ACTIVE"
+  },
+  {
+    "controlId": "AML-004",
+    "name": "Suspicious Activity Escalation",
+    "description": "SAR escalations.",
+    "domain": "AML",
+    "riskLevel": "HIGH",
+    "frequency": "AD_HOC",
+    "requiredEvidenceTypes": ["SAR_FORM"],
+    "status": "ACTIVE"
+  },
+  {
+    "controlId": "KYC-001",
+    "name": "Customer Due Diligence",
+    "description": "CDD for new customers.",
+    "domain": "KYC",
+    "riskLevel": "MEDIUM",
+    "frequency": "AD_HOC",
+    "requiredEvidenceTypes": ["ID_DOCUMENT", "UTILITY_BILL"],
+    "status": "ACTIVE"
+  },
+  {
+    "controlId": "KYC-002",
+    "name": "Periodic KYC Refresh",
+    "description": "Refresh KYC every 3 years.",
+    "domain": "KYC",
+    "riskLevel": "MEDIUM",
+    "frequency": "TRIENNIAL",
+    "requiredEvidenceTypes": ["REFRESH_REPORT"],
+    "status": "ACTIVE"
+  },
+  {
+    "controlId": "ACCESS-001",
+    "name": "Privileged Access Review",
+    "description": "Review PAM.",
+    "domain": "IT_SECURITY",
+    "riskLevel": "HIGH",
+    "frequency": "QUARTERLY",
+    "requiredEvidenceTypes": ["ACCESS_LIST"],
+    "status": "ACTIVE"
+  },
+  {
+    "controlId": "ACCESS-002",
+    "name": "User Access Termination",
+    "description": "Ensure access is revoked.",
+    "domain": "IT_SECURITY",
+    "riskLevel": "MEDIUM",
+    "frequency": "DAILY",
+    "requiredEvidenceTypes": ["TICKET_LOG"],
+    "status": "ACTIVE"
+  },
+  {
+    "controlId": "VENDOR-001",
+    "name": "Critical Vendor Review",
+    "description": "Review vendor compliance.",
+    "domain": "VENDOR_MGMT",
+    "riskLevel": "HIGH",
+    "frequency": "ANNUAL",
+    "requiredEvidenceTypes": ["SOC2_REPORT"],
+    "status": "ACTIVE"
+  },
+  {
+    "controlId": "BCP-001",
+    "name": "Business Continuity Testing",
+    "description": "Test BCP.",
+    "domain": "RESILIENCE",
+    "riskLevel": "CRITICAL",
+    "frequency": "ANNUAL",
+    "requiredEvidenceTypes": ["TEST_RESULTS"],
+    "status": "ACTIVE"
+  }
+]
