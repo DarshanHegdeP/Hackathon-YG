@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PERSON 4 - Workflow & Case Orchestrator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .step-active { border-color: #3b82f6; background-color: #eff6ff; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-slate-800/80 backdrop-blur border-b border-slate-700/80 sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="bg-gradient-to-tr from-blue-600 to-indigo-500 text-white font-black p-2 rounded-xl shadow-lg shadow-blue-500/20 text-sm tracking-wider">
+        P4
+      </div>
+      <div>
+        <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+          PERSON 4 Orchestrator
+          <span class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium">Online</span>
+        </h1>
+        <p class="text-xs text-slate-400">Automated Case, Task, Email, Reminder & Escalation Engine</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-3">
+      <a href="/docs" target="_blank" class="text-xs bg-slate-700/60 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-600 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-book text-blue-400"></i> API Docs (/docs)
+      </a>
+      <button onclick="runExactDiagramScenario()" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-1.5 rounded-lg shadow-md shadow-blue-600/30 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-bolt"></i> Run Diagram Scenario (Risk: 72)
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+    <!-- Interactive Architecture Flow Diagram -->
+    <section class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 shadow-xl">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-semibold tracking-wide uppercase text-slate-400 flex items-center gap-2">
+          <i class="fa-solid fa-diagram-project text-blue-400"></i> Active Workflow Architecture
+        </h2>
+        <span class="text-xs text-slate-500 font-mono">Person 3 → Person 4 → Recipient</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+        <!-- Node 1: Person 3 -->
+        <div class="bg-slate-900/90 border border-slate-700 rounded-xl p-4 relative group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-user-gear"></i> Upstream Source
+            </span>
+            <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded">Person 3</span>
+          </div>
+          <div class="font-bold text-base text-white">Risk Evaluation Engine</div>
+          <div class="mt-2 space-y-1 text-xs mono">
+            <div class="text-slate-300 flex justify-between">
+              <span class="text-slate-500">Output:</span>
+              <span class="text-amber-300 font-bold" id="flow-risk-score">risk_score = 72</span>
+            </div>
+            <div class="text-slate-300 flex justify-between">
+              <span class="text-slate-500">Action:</span>
+              <span class="text-blue-300 font-semibold" id="flow-action">REQUEST_DOCUMENTS</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Node 2: Person 4 (Highlighted) -->
+        <div class="bg-gradient-to-b from-blue-950/40 to-slate-900 border-2 border-blue-500/80 rounded-xl p-4 shadow-lg shadow-blue-500/10 relative">
+          <div class="absolute -top-3 left-4 bg-blue-600 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow">
+            PERSON 4 (You)
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-1 text-xs">
+            <div class="bg-slate-800/80 p-2 rounded border border-slate-700/60 flex items-center justify-between" id="badge-case">
+              <span class="text-slate-400">Case →</span>
+              <span class="text-rose-400 font-bold">HIGH</span>
+            </div>
+            <div class="bg-slate-800/80 p-2 rounded border border-slate-700/60 flex items-center justify-between" id="badge-task">
+              <span class="text-slate-400">Task →</span>
+              <span class="text-emerald-400 font-semibold">Created</span>
+            </div>
+            <div class="bg-slate-800/80 p-2 rounded border border-slate-700/60 flex items-center justify-between" id="badge-email">
+              <span class="text-slate-400">Email →</span>
+              <span class="text-blue-400 font-semibold">Created/Sent</span>
+            </div>
+            <div class="bg-slate-800/80 p-2 rounded border border-slate-700/60 flex items-center justify-between" id="badge-reminder">
+              <span class="text-slate-400">Reminder →</span>
+              <span class="text-purple-400 font-semibold">Scheduled</span>
+            </div>
+            <div class="bg-slate-800/80 p-2 rounded border border-slate-700/60 flex items-center justify-between" id="badge-escalation">
+              <span class="text-slate-400">Escalation →</span>
+              <span class="text-amber-400 font-semibold">Configured</span>
+            </div>
+            <div class="bg-slate-800/80 p-2 rounded border border-slate-700/60 flex items-center justify-between" id="badge-timeline">
+              <span class="text-slate-400">Timeline →</span>
+              <span class="text-cyan-400 font-semibold">Updated</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Node 3: Recipient -->
+        <div class="bg-slate-900/90 border border-slate-700 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-envelope-open-text"></i> Downstream Recipient
+            </span>
+            <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">Actionable</span>
+          </div>
+          <div class="font-bold text-base text-white" id="flow-recipient-name">Employee / Customer</div>
+          <p class="text-xs text-slate-400 mt-1">Receives official request, opens upload portal & fulfills verification.</p>
+          <div class="mt-3">
+            <button id="open-portal-btn" onclick="openPortal()" disabled class="w-full text-xs bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 text-slate-300 font-medium py-1.5 rounded border border-slate-600 transition flex items-center justify-center gap-1">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Recipient Portal
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Workspace Split: Controls vs Execution Inspector -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left Column (4 cols): Simulator & Payload Form -->
+      <div class="lg:col-span-4 space-y-5">
+        <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 shadow-xl space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-700">
+            <h3 class="font-bold text-sm text-white flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-blue-400"></i> Person 3 Event Trigger
+            </h3>
+            <span class="text-[11px] text-slate-400 bg-slate-700/60 px-2 py-0.5 rounded">Webhook Input</span>
+          </div>
+
+          <form id="trigger-form" onsubmit="handleTriggerSubmit(event)" class="space-y-4 text-xs">
+            <!-- Risk Score Slider -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="font-semibold text-slate-300">Risk Score (0 - 100):</label>
+                <span id="risk-score-display" class="font-mono font-bold text-amber-400 text-sm">72</span>
+              </div>
+              <input type="range" id="input-risk-score" min="10" max="100" value="72" step="1" 
+                     class="w-full accent-blue-500 cursor-pointer" oninput="updateRiskDisplay(this.value)">
+              <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
+                <span>0 (Low)</span>
+                <span>40 (Med)</span>
+                <span class="text-rose-400 font-bold">70+ (HIGH)</span>
+              </div>
+            </div>
+
+            <!-- Decision Action -->
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">Decision / Action:</label>
+              <select id="input-decision" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-blue-500">
+                <option value="REQUEST_DOCUMENTS" selected>REQUEST_DOCUMENTS (Diagram Default)</option>
+                <option value="MANUAL_REVIEW">MANUAL_REVIEW</option>
+                <option value="APPROVE">APPROVE</option>
+              </select>
+            </div>
+
+            <!-- Subject Type & Name -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-semibold text-slate-300 mb-1">Subject Type:</label>
+                <select id="input-subject-type" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+                  <option value="Employee" selected>Employee</option>
+                  <option value="Customer">Customer</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-300 mb-1">ID:</label>
+                <input type="text" id="input-subject-id" value="EMP-7842" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+              </div>
+            </div>
+
+            <!-- Name and Email -->
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">Full Name:</label>
+              <input type="text" id="input-name" value="Alex Morgan" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">Recipient Email:</label>
+              <input type="email" id="input-email" value="alex.morgan@acmeworks.internal" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">Escalation Manager Email:</label>
+              <input type="email" id="input-manager-email" value="sarah.chen@acmeworks.internal" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+            </div>
+
+            <!-- Requested Documents -->
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">Requested Documents:</label>
+              <div class="space-y-1.5 bg-slate-900/60 p-2.5 rounded-lg border border-slate-700/60">
+                <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                  <input type="checkbox" name="docs" value="Government Photo ID / Passport" checked class="rounded accent-blue-500">
+                  <span>Government Photo ID / Passport</span>
+                </label>
+                <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                  <input type="checkbox" name="docs" value="Proof of Address (Utility Bill / Bank Statement)" checked class="rounded accent-blue-500">
+                  <span>Proof of Address (Utility Bill)</span>
+                </label>
+                <label class="flex items-center space-x-2 text-slate-300 cursor-pointer">
+                  <input type="checkbox" name="docs" value="Employment Verification Certificate" checked class="rounded accent-blue-500">
+                  <span>Employment Verification Certificate</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- SLA Hours -->
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">SLA Target (Hours):</label>
+              <input type="number" id="input-sla" value="72" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-200">
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="btn-trigger" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-paper-plane"></i> Dispatch Event to Person 4
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right Column (8 cols): Execution Inspector & Tabs -->
+      <div class="lg:col-span-8 space-y-5">
+        
+        <!-- Live Status Banner -->
+        <div id="status-card" class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-3">
+              <span id="case-priority-badge" class="px-3 py-1 text-xs font-black rounded-lg uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/40">
+                HIGH PRIORITY
+              </span>
+              <span id="case-id-display" class="font-mono text-sm font-bold text-white">CASE-PENDING</span>
+              <span id="case-status-badge" class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">DOCUMENT_REQUESTED</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2" id="case-summary-line">
+              Waiting for initial trigger... Click "Run Diagram Scenario" to execute Person 4 pipeline.
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="openPortal()" id="btn-view-portal" disabled class="text-xs bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+              <i class="fa-solid fa-id-card"></i> Recipient Portal View
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabbed Details Card -->
+        <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl shadow-xl overflow-hidden">
+          <!-- Tab Navigation -->
+          <div class="flex border-b border-slate-700 overflow-x-auto text-xs font-semibold bg-slate-900/40">
+            <button onclick="switchTab('case')" id="tab-btn-case" class="px-4 py-3 border-b-2 border-blue-500 text-blue-400 flex items-center gap-2 whitespace-nowrap">
+              <i class="fa-solid fa-folder-open"></i> 1. Case Details
+            </button>
+            <button onclick="switchTab('task')" id="tab-btn-task" class="px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+              <i class="fa-solid fa-list-check"></i> 2. Task Created
+            </button>
+            <button onclick="switchTab('email')" id="tab-btn-email" class="px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+              <i class="fa-solid fa-envelope"></i> 3. Email Sent
+            </button>
+            <button onclick="switchTab('reminder')" id="tab-btn-reminder" class="px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+              <i class="fa-regular fa-clock"></i> 4. Reminders
+            </button>
+            <button onclick="switchTab('escalation')" id="tab-btn-escalation" class="px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+              <i class="fa-solid fa-triangle-exclamation"></i> 5. Escalation
+            </button>
+            <button onclick="switchTab('timeline')" id="tab-btn-timeline" class="px-4 py-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+              <i class="fa-solid fa-timeline"></i> 6. Timeline
+            </button>
+          </div>
+
+          <!-- Tab Content Panes -->
+          <div class="p-5 text-xs">
+
+            <!-- Tab 1: Case Details -->
+            <div id="tab-content-case" class="space-y-4">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/60">
+                  <div class="text-slate-500 text-[11px]">Assessed Risk Score</div>
+                  <div class="text-lg font-bold text-amber-400 font-mono mt-1" id="pane-risk-score">--</div>
+                </div>
+                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/60">
+                  <div class="text-slate-500 text-[11px]">Case Priority</div>
+                  <div class="text-lg font-bold text-rose-400 font-mono mt-1" id="pane-priority">--</div>
+                </div>
+                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/60">
+                  <div class="text-slate-500 text-[11px]">SLA Deadline</div>
+                  <div class="text-xs font-semibold text-slate-200 font-mono mt-1" id="pane-deadline">--</div>
+                </div>
+              </div>
+
+              <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/60 space-y-2">
+                <div class="font-semibold text-slate-300">Requested Documentation Checklist:</div>
+                <ul id="pane-doc-list" class="list-disc list-inside text-slate-300 space-y-1">
+                  <li>No case active yet.</li>
+                </ul>
+              </div>
+
+              <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/60">
+                <div class="font-semibold text-slate-300 mb-1">Reason & Notes from Person 3:</div>
+                <p id="pane-notes" class="text-slate-400 italic">Awaiting event...</p>
+              </div>
+            </div>
+
+            <!-- Tab 2: Task Created -->
+            <div id="tab-content-task" class="hidden space-y-4">
+              <div id="task-view-container" class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-mono font-bold text-emerald-400" id="task-id">TSK-XXXX</span>
+                  <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded text-[11px] font-semibold" id="task-status">Created</span>
+                </div>
+                <h4 class="text-sm font-bold text-white" id="task-title">Review Verification Documents</h4>
+                <p class="text-slate-300 leading-relaxed" id="task-desc">Task description will appear here.</p>
+                <div class="pt-2 border-t border-slate-800 flex justify-between text-slate-400 text-[11px]">
+                  <span>Assignee: <strong class="text-slate-200" id="task-assignee">Tier-2 Queue</strong></span>
+                  <span>Due: <strong class="text-slate-200 font-mono" id="task-due">--</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 3: Email Created/Sent -->
+            <div id="tab-content-email" class="hidden space-y-4">
+              <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700 flex flex-wrap justify-between items-center gap-2">
+                <div>
+                  <div class="text-[11px] text-slate-400">Recipient: <span class="text-white font-mono" id="email-recipient">--</span></div>
+                  <div class="text-[11px] text-slate-400">Subject: <span class="text-slate-200 font-semibold" id="email-subject">--</span></div>
+                </div>
+                <span class="bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2.5 py-1 rounded-full text-[11px] font-semibold">
+                  <i class="fa-solid fa-check"></i> Created/Sent
+                </span>
+              </div>
+              <div class="border border-slate-700 rounded-xl overflow-hidden bg-white text-slate-900 p-4 max-h-96 overflow-y-auto" id="email-rendered-body">
+                <p class="text-slate-500 italic text-center py-8">Email preview will render once triggered.</p>
+              </div>
+            </div>
+
+            <!-- Tab 4: Reminders Scheduled -->
+            <div id="tab-content-reminder" class="hidden space-y-3">
+              <p class="text-slate-400">Automated multi-cadence reminders registered with Person 4 scheduler:</p>
+              <div id="reminders-list" class="space-y-2">
+                <p class="text-slate-500 italic">No scheduled reminders yet.</p>
+              </div>
+            </div>
+
+            <!-- Tab 5: Escalation Configured -->
+            <div id="tab-content-escalation" class="hidden space-y-4">
+              <div class="bg-slate-900/80 p-4 rounded-xl border border-amber-500/40 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="font-mono text-amber-400 font-bold" id="esc-id">ESC-XXXX</span>
+                  <span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded text-[11px] font-semibold">Configured</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span class="text-slate-500">Escalate To:</span>
+                    <div class="font-semibold text-slate-200" id="esc-target">--</div>
+                  </div>
+                  <div>
+                    <span class="text-slate-500">Escalation Severity:</span>
+                    <div class="font-bold text-rose-400" id="esc-priority">CRITICAL</div>
+                  </div>
+                  <div>
+                    <span class="text-slate-500">SLA Trigger Threshold:</span>
+                    <div class="font-semibold text-slate-200" id="esc-threshold">72 Hours</div>
+                  </div>
+                  <div>
+                    <span class="text-slate-500">Trigger Timestamp:</span>
+                    <div class="font-mono text-slate-200" id="esc-trigger-time">--</div>
+                  </div>
+                </div>
+                <div class="p-2.5 bg-slate-950/60 rounded border border-slate-800 text-slate-300">
+                  <span class="text-slate-500">Condition:</span>
+                  <p id="esc-condition" class="mt-0.5">Non-submission of requested documents within SLA threshold.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 6: Timeline Updated -->
+            <div id="tab-content-timeline" class="hidden space-y-4">
+              <div class="relative pl-6 space-y-4 border-l-2 border-slate-700" id="timeline-container">
+                <p class="text-slate-500 italic">Timeline empty.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-500">
+    Person 4 Case & Workflow Orchestrator &bull; P4 Project Workspace &bull; FastAPI + Pydantic Engine
+  </footer>
+
+  <script>
+    let activeCaseId = null;
+
+    function updateRiskDisplay(val) {
+      document.getElementById('risk-score-display').innerText = val;
+      const num = parseFloat(val);
+      const disp = document.getElementById('risk-score-display');
+      if (num >= 70) {
+        disp.className = "font-mono font-bold text-rose-400 text-sm";
+      } else if (num >= 40) {
+        disp.className = "font-mono font-bold text-amber-400 text-sm";
+      } else {
+        disp.className = "font-mono font-bold text-emerald-400 text-sm";
+      }
+    }
+
+    function switchTab(tabName) {
+      ['case', 'task', 'email', 'reminder', 'escalation', 'timeline'].forEach(t => {
+        document.getElementById(`tab-content-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-btn-${t}`);
+        btn.classList.remove('border-blue-500', 'text-blue-400');
+        btn.classList.add('border-transparent', 'text-slate-400');
+      });
+      document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      activeBtn.classList.remove('border-transparent', 'text-slate-400');
+      activeBtn.classList.add('border-blue-500', 'text-blue-400');
+    }
+
+    async function runExactDiagramScenario() {
+      document.getElementById('input-risk-score').value = 72;
+      updateRiskDisplay(72);
+      document.getElementById('input-decision').value = 'REQUEST_DOCUMENTS';
+      await handleTriggerSubmit(new Event('submit'));
+    }
+
+    async function handleTriggerSubmit(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      
+      const btn = document.getElementById('btn-trigger');
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Person 4 Pipeline...`;
+
+      // Gather requested documents
+      const docs = Array.from(document.querySelectorAll('input[name="docs"]:checked')).map(cb => cb.value);
+
+      const payload = {
+        source: "Person 3",
+        risk_score: parseFloat(document.getElementById('input-risk-score').value),
+        decision: document.getElementById('input-decision').value,
+        subject: {
+          id: document.getElementById('input-subject-id').value,
+          type: document.getElementById('input-subject-type').value,
+          name: document.getElementById('input-name').value,
+          email: document.getElementById('input-email').value,
+          department_or_account: "Global Operations & Technology",
+          manager_email: document.getElementById('input-manager-email').value
+        },
+        requested_documents: docs.length > 0 ? docs : ["Government Photo ID / Passport"],
+        risk_factors: [
+          "Behavioral anomaly flagged by Person 3",
+          `Calculated Risk Score: ${document.getElementById('input-risk-score').value} (High Severity)`,
+          "Regulatory compliance check required"
+        ],
+        notes: "Automated event ingest from Person 3 with action REQUEST_DOCUMENTS",
+        sla_hours: parseInt(document.getElementById('input-sla').value) || 72
+      };
+
+      try {
+        const res = await fetch('/api/webhook/person3', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        renderResult(data);
+      } catch (err) {
+        alert("Error executing Person 4 workflow: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Dispatch Event to Person 4`;
+      }
+    }
+
+    function renderResult(data) {
+      activeCaseId = data.case.case_id;
+
+      // Update Top Flow Diagram
+      document.getElementById('flow-risk-score').innerText = `risk_score = ${data.case.risk_score}`;
+      document.getElementById('flow-recipient-name').innerText = `${data.case.subject.type} (${data.case.subject.name})`;
+      document.getElementById('open-portal-btn').disabled = false;
+      document.getElementById('btn-view-portal').disabled = false;
+
+      // Update Status Banner
+      document.getElementById('case-id-display').innerText = data.case.case_id;
+      document.getElementById('case-status-badge').innerText = data.case.status;
+      const priBadge = document.getElementById('case-priority-badge');
+      priBadge.innerText = `${data.case.priority} PRIORITY`;
+      if (data.case.priority === 'HIGH' || data.case.priority === 'CRITICAL') {
+        priBadge.className = "px-3 py-1 text-xs font-black rounded-lg uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/40";
+      } else if (data.case.priority === 'MEDIUM') {
+        priBadge.className = "px-3 py-1 text-xs font-black rounded-lg uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/40";
+      } else {
+        priBadge.className = "px-3 py-1 text-xs font-black rounded-lg uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+      }
+
+      document.getElementById('case-summary-line').innerText = 
+        `Person 4 successfully executed all 6 workflow operations for ${data.case.subject.name} (Risk: ${data.case.risk_score}). Notification email dispatched.`;
+
+      // Tab 1: Case Details
+      document.getElementById('pane-risk-score').innerText = data.case.risk_score;
+      document.getElementById('pane-priority').innerText = data.case.priority;
+      document.getElementById('pane-deadline').innerText = new Date(data.case.deadline_at).toLocaleString();
+      document.getElementById('pane-notes').innerText = data.case.notes || 'N/A';
+      document.getElementById('pane-doc-list').innerHTML = data.case.requested_documents.map(d => `<li>${d}</li>`).join('');
+
+      // Tab 2: Task Created
+      document.getElementById('task-id').innerText = data.task.task_id;
+      document.getElementById('task-status').innerText = data.task.status;
+      document.getElementById('task-title').innerText = data.task.title;
+      document.getElementById('task-desc').innerText = data.task.description;
+      document.getElementById('task-assignee').innerText = data.task.assignee;
+      document.getElementById('task-due').innerText = new Date(data.task.due_date).toLocaleString();
+
+      // Tab 3: Email Created/Sent
+      document.getElementById('email-recipient').innerText = `${data.email.recipient_name} <${data.email.recipient}>`;
+      document.getElementById('email-subject').innerText = data.email.subject;
+      document.getElementById('email-rendered-body').innerHTML = data.email.body_html;
+
+      // Tab 4: Reminders Scheduled
+      document.getElementById('reminders-list').innerHTML = data.reminders.map(r => `
+        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/80 flex items-center justify-between">
+          <div>
+            <div class="font-semibold text-slate-200">${r.label}</div>
+            <div class="text-[11px] text-slate-400">${r.description}</div>
+            <div class="text-[10px] text-slate-500 font-mono mt-0.5">Scheduled for: ${new Date(r.scheduled_for).toLocaleString()}</div>
+          </div>
+          <span class="bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded text-[10px] font-semibold">${r.status}</span>
+        </div>
+      `).join('');
+
+      // Tab 5: Escalation Configured
+      document.getElementById('esc-id').innerText = data.escalation.escalation_id;
+      document.getElementById('esc-target').innerText = data.escalation.escalate_to;
+      document.getElementById('esc-priority').innerText = data.escalation.escalation_priority;
+      document.getElementById('esc-threshold').innerText = `${data.escalation.threshold_hours} Hours`;
+      document.getElementById('esc-trigger-time').innerText = new Date(data.escalation.trigger_at).toLocaleString();
+      document.getElementById('esc-condition').innerText = data.escalation.condition;
+
+      // Tab 6: Timeline Updated
+      document.getElementById('timeline-container').innerHTML = data.timeline.map(t => {
+        let dotColor = "bg-blue-500";
+        if (t.badge_type === 'high') dotColor = "bg-rose-500";
+        if (t.badge_type === 'warning') dotColor = "bg-amber-500";
+        if (t.badge_type === 'success') dotColor = "bg-emerald-500";
+
+        return `
+          <div class="relative group">
+            <span class="absolute -left-[31px] top-1.5 w-3.5 h-3.5 rounded-full ${dotColor} ring-4 ring-slate-900"></span>
+            <div class="text-[11px] text-slate-400 font-mono">${new Date(t.timestamp).toLocaleTimeString()} - ${t.step_name}</div>
+            <div class="text-xs font-bold text-white">${t.action}</div>
+            <div class="text-xs text-slate-300 mt-0.5">${t.detail}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openPortal() {
+      if (!activeCaseId) return;
+      window.open(`/portal/${activeCaseId}`, '_blank');
+    }
+
+    // Auto-run scenario on load for immediate interactive demonstration
+    window.addEventListener('DOMContentLoaded', () => {
+      runExactDiagramScenario();
+    });
+  </script>
+</body>
+</html>
